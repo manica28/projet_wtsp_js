@@ -1,4 +1,5 @@
-import { contacts, groups } from './data.js';
+import { contacts, groups, users } from './data.js';
+import { messageError, messageSucces, normalizePhone } from './validator.js'
 
 let currentView ='';
 let selectedContact = null;
@@ -46,11 +47,25 @@ function handleSearch(event) {
     // On prépare une liste filtrée selon la vue actuelle (messages ou groupes)
     let listeFiltree = [];
 
-    if (currentView === 'messages') {
-        listeFiltree = contacts.filter(contact =>
-            contact.nom.toLowerCase().includes(texteRecherche)
-        );
-    } else if (currentView === 'groups') {
+    if (currentView === 'messages') 
+    {
+        if (texteRecherche === '*') 
+        {
+        // Retourner tous les contacts triés par ordre alphabétique
+        listeFiltree = contacts.slice().sort((a, b) =>
+            a.nom.localeCompare(b.nom)
+            );
+        } 
+        else 
+        {
+            // Filtrage sur le nom ou le téléphone
+            listeFiltree = contacts.filter(contact =>
+                contact.nom.toLowerCase().includes(texteRecherche) ||
+                contact.telephone.toString().includes(texteRecherche)
+            );
+        }
+    }
+    else if (currentView === 'groups') {
         listeFiltree = groups.filter(groupe =>
             groupe.nom.toLowerCase().includes(texteRecherche)
         );
@@ -84,7 +99,7 @@ function handleSearch(event) {
     replaceListContent(nouveauConteneur);
 }
 
-// changer de vue
+// Corriger la fonction switchView pour la diffusion
 function switchView(view) {
     currentView = view;
     
@@ -108,6 +123,11 @@ function switchView(view) {
             document.querySelector('.archive').classList.add('bg-[#e0b44b]');
             updateMenuTitle('Discussions archivées');
             renderArchivesList();
+            break;
+        case 'broadcasts':
+            document.querySelector('.diffusion').classList.add('bg-[#e0b44b]');
+            updateMenuTitle('Messages de diffusion');
+            renderDiffusion();
             break;
     }
 }
@@ -146,8 +166,8 @@ function createGroupElement(group) {
     div.onclick = () => selectGroup(group);
 
     div.innerHTML = `
-        <div class="w-12 h-12 bg-blue-300 rounded-full flex items-center justify-center mr-3">
-            <i class="fas fa-users text-blue-600"></i>
+        <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-users text-gray-500"></i>
         </div>
         <div class="flex-1">
             <div class="flex justify-between items-center">
@@ -165,16 +185,12 @@ function createGroupElement(group) {
 // Create new contact button
 function createNewContactButton() {
     const div = document.createElement('div');
-    div.className = 'flex items-center p-3 hover:bg-green-50 cursor-pointer border-b border-gray-200 text-green-600';
+    //div.className = 'flex items-center p-3 hover:bg-green-50 cursor-pointer border-b border-gray-200 text-green-600';
     div.onclick = showNewContactModal;
     
     div.innerHTML = `
-        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+        <div class="w-12 h-12 hidden bg-green-100 rounded-full flex items-center justify-center mr-3">
             <i class="fas fa-plus text-green-600"></i>
-        </div>
-        <div class="flex-1">
-            <h3 class="font-medium">Nouveau contact</h3>
-            <p class="text-sm text-gray-600">Ajouter un nouveau contact</p>
         </div>
     `;
     return div;
@@ -191,12 +207,7 @@ function createNewGroupButton()
         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
             <i class="fas fa-plus text-blue-600"></i>
         </div>
-        <div class="flex-1">
-            <h3 class="font-medium">Nouveau groupe</h3>
-            <p class="text-sm text-gray-600">Créer un nouveau groupe</p>
-        </div>
     `;
-    
     return div;
 }
 
@@ -211,92 +222,11 @@ function replaceListContent(newContent)
     menuContainer.appendChild(newContent);
 }
 
-
-// Show chat interface
-function showChatInterface(contact, isGroup = false) {
-    const chatContainer = discussionsContainer;
-    chatContainer.innerHTML = `
-        <div class="flex flex-col h-full">
-            <!-- En-tête -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-300 bg-[#d5cebf]">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                        <i class="fas fa-${isGroup ? 'users' : 'user'} text-gray-600"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-medium">${contact.nom}</h2>
-                        ${isGroup ? `<p class="text-sm text-gray-600">${contact.membres.join(', ')}</p>
-                        <p class="text-xs text-blue-600 font-bold">${contact.admin === "Vous" ? "Vous : Admin du groupe" : ""}</p>` 
-                        : `<p class="text-sm text-gray-600">En ligne</p>`}
-                    </div>
-                </div>
-                <div class="flex gap-3 text-gray-600">
-                    <button class="w-[30px] h-[30px] border-2 border-orange-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-backspace text-orange-500"></i>
-                    </button>
-                    <button class="w-8 h-8 border-2 border-gray-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-archive text-gray-500"></i>
-                    </button>
-                    <button class="w-8 h-8 border-2 border-black rounded-full flex items-center justify-center">
-                        <i class="fas fa-square text-black"></i>
-                    </button>
-                    <button class="w-8 h-8 border-2 border-red-500 rounded-full flex items-center justify-center">
-                        <i class="fas fa-trash text-red-500"></i>
-                    </button>
-                </div>
-            </div>
-            <!-- Zone messages -->
-            <div id="messagesZone" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                ${
-                    (contact.messages || []).map(msg => `
-                        <div class="flex ${msg.envoye ? 'justify-end' : 'justify-start'}">
-                            <div class="${msg.envoye ? 'bg-green-500' : 'bg-white'} p-3 rounded-lg max-w-xs shadow">
-                                <p>${msg.texte}</p>
-                                <span class="text-xs text-gray-500 mt-1 block">${msg.heure}</span>
-                            </div>
-                        </div>
-                    `).join('')
-                }
-            </div>
-            <!-- Barre de saisie -->
-            <form id="messageForm" class="p-4 bg-gray-100 border-t border-gray-300">
-                <div class="flex items-center space-x-2">
-                    <button type="button" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
-                        <i class="fas fa-smile text-gray-600"></i>
-                    </button>
-                    <button type="button" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
-                        <i class="fas fa-paperclip text-gray-600"></i>
-                    </button>
-                    <input type="text" id="champMessage" placeholder="Tapez un message..." 
-                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500" 
-                        autocomplete="off" required>
-                    <button type="submit"
-                        class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 text-white">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    // Ajout du gestionnaire d'envoi de message
-    const form = document.getElementById('messageForm');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        envoyerMessage();
-    });
-
-    setTimeout(() => {
-        const archiveBtn = chatContainer.querySelector('.fa-archive')?.closest('button');
-        if (archiveBtn) {
-            archiveBtn.onclick = () => archiverDiscussion(contact, isGroup);
-        }
-    }, 0);
-}
-
+// Modifier la fonction showChatInterface pour ajouter un bouton de gestion des membres
+// Fonction pour afficher le modal de gestion des membres (Admin seulement)
 // Show new contact modal
 function showNewContactModal() {
-    const modal = createModal('Nouveau Contact', `
+    const modal = createModal('Ajouter un Nouveau Contact', `
         <div class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
@@ -665,8 +595,188 @@ function createBroadcastList() {
     console.log('Création d\'une liste de diffusion...');
     // Implémentation à ajouter selon vos besoins
 }
+// Corriger la fonction renderDiffusion
+function renderDiffusion() {
+    const listContainer = createListContainer();
+    
+    // Bouton pour créer une nouvelle diffusion
+    const newBroadcastBtn = document.createElement('div');
+    newBroadcastBtn.className = 'flex items-center p-3 hover:bg-green-50 cursor-pointer border-b border-gray-200 text-green-600';
+    newBroadcastBtn.onclick = showNewBroadcastModal;
+    
+    newBroadcastBtn.innerHTML = `
+        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-bullhorn text-green-600"></i>
+        </div>
+        <div>
+            <h3 class="font-medium">Nouvelle diffusion</h3>
+            <p class="text-sm text-gray-600">Envoyer un message à plusieurs contacts</p>
+        </div>
+    `;
+    
+    listContainer.appendChild(newBroadcastBtn);
+    replaceListContent(listContainer);
+}
 
+// Modal pour créer une nouvelle diffusion
+function showNewBroadcastModal() {
+    const modalHTML = `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="modal">
+            <div class="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                <h2 class="text-xl font-bold mb-4">Nouvelle diffusion</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Message à diffuser</label>
+                        <textarea id="broadcastMessage" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500" placeholder="Tapez votre message..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sélectionner les destinataires</label>
+                        <div class="space-y-2 max-h-40 overflow-y-auto border rounded p-2">
+                            ${contacts.filter(c => !c.archive).map(contact => `
+                                <label class="flex items-center hover:bg-gray-50 p-1 rounded">
+                                    <input type="checkbox" value="${contact.id}" class="mr-2 broadcast-recipient-checkbox">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2 text-xs font-bold text-white">
+                                        ${getInitiales(contact.nom)}
+                                    </div>
+                                    <span>${contact.nom}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <div class="mt-2">
+                            <button type="button" id="selectAllBtn" class="text-sm text-blue-500 hover:text-blue-700">
+                                Tout sélectionner
+                            </button>
+                            <button type="button" id="deselectAllBtn" class="text-sm text-gray-500 hover:text-gray-700 ml-4">
+                                Tout désélectionner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button id="cancelBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Annuler</button>
+                    <button id="sendBtn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insérer le modal dans le DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Attacher les événements APRÈS que le modal soit dans le DOM
+    setTimeout(() => {
+        // Bouton Annuler
+        const cancelBtn = document.getElementById('cancelBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeModal);
+        }
+
+        // Bouton Envoyer
+        const sendBtn = document.getElementById('sendBtn');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', sendBroadcastMessage);
+        }
+
+        // Boutons sélectionner/désélectionner tout
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.broadcast-recipient-checkbox').forEach(cb => cb.checked = true);
+            });
+        }
+        
+        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.broadcast-recipient-checkbox').forEach(cb => cb.checked = false);
+            });
+        }
+    }, 100);
+}
+
+// Fonction pour envoyer le message de diffusion - VERSION CORRIGÉE
+function sendBroadcastMessage() {
+    console.log('Tentative d\'envoi du message de diffusion...'); // Debug
+    
+    const messageElement = document.getElementById('broadcastMessage');
+    const message = messageElement ? messageElement.value.trim() : '';
+    
+    console.log('Message:', message); // Debug
+    
+    const selectedRecipients = Array.from(document.querySelectorAll('.broadcast-recipient-checkbox:checked'))
+        .map(checkbox => {
+            const contactId = parseInt(checkbox.value);
+            return contacts.find(c => c.id === contactId);
+        })
+        .filter(contact => contact !== undefined);
+
+    console.log('Destinataires sélectionnés:', selectedRecipients); // Debug
+
+    if (!message) {
+        showNotification('Veuillez saisir un message', 'error');
+        return;
+    }
+
+    if (selectedRecipients.length === 0) {
+        showNotification('Veuillez sélectionner au moins un destinataire', 'error');
+        return;
+    }
+
+    const now = new Date();
+    const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    // Envoyer le message à chaque destinataire
+    selectedRecipients.forEach(contact => {
+        if (!contact.messages) {
+            contact.messages = [];
+        }
+        
+        contact.messages.push({
+            texte: message,
+            heure: heure,
+            envoye: true
+        });
+
+        // Mettre à jour le dernier message
+        contact.dernierMessage = message;
+        contact.heure = heure;
+    });
+
+    console.log('Messages envoyés avec succès'); // Debug
+    
+    closeModal();
+    showNotification(`Message envoyé à ${selectedRecipients.length} contact(s)`, 'success');
+    
+    // Actualiser l'affichage si on est dans la vue messages
+    if (currentView === 'messages') {
+        renderContactsList();
+    }
+}
 // 2. Corriger la fonction envoyerMessage pour la cohérence des propriétés
+// function envoyerMessage() {
+//     const input = document.getElementById('champMessage');
+//     const message = input.value.trim();
+//     if (!message) return;
+
+//     const now = new Date();
+//     const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+//     // Utiliser les mêmes noms de propriétés que dans l'affichage
+//     if (!selectedContact.messages) selectedContact.messages = [];
+//     selectedContact.messages.push({ 
+//         texte: message, // Changé de 'text' à 'texte'
+//         heure: heure,   // Cohérent
+//         envoye: true    // Changé de 'fromMe' à 'envoye'
+//     });
+
+//     // Mettre à jour le dernier message du contact
+//     selectedContact.dernierMessage = message;
+//     selectedContact.heure = heure;
+
+//     showChatInterface(selectedContact, !!selectedContact.membres); // Changé 'members' à 'membres'
+//     input.value = '';
+// }
+// Fonction corrigée pour envoyer un message et mettre à jour l'affichage
 function envoyerMessage() {
     const input = document.getElementById('champMessage');
     const message = input.value.trim();
@@ -675,21 +785,62 @@ function envoyerMessage() {
     const now = new Date();
     const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    // Utiliser les mêmes noms de propriétés que dans l'affichage
+    // Initialiser le tableau de messages si nécessaire
     if (!selectedContact.messages) selectedContact.messages = [];
+    
+    // Ajouter le nouveau message
     selectedContact.messages.push({ 
-        texte: message, // Changé de 'text' à 'texte'
-        heure: heure,   // Cohérent
-        envoye: true    // Changé de 'fromMe' à 'envoye'
+        texte: message,
+        heure: heure,
+        envoye: true
     });
 
     // Mettre à jour le dernier message du contact
     selectedContact.dernierMessage = message;
     selectedContact.heure = heure;
 
-    showChatInterface(selectedContact, !!selectedContact.membres); // Changé 'members' à 'membres'
+    // Vider le champ de saisie
     input.value = '';
+
+    // Supprimer le brouillon après envoi
+    delete drafts[selectedContact.id];
+    const draftIndicator = document.getElementById('draftIndicator');
+    if (draftIndicator) {
+        draftIndicator.classList.add('hidden');
+    }
+
+    // Mettre à jour uniquement la zone des messages au lieu de recharger toute l'interface
+    updateMessagesDisplay(selectedContact);
+
+    // Mettre à jour la liste des contacts si on est dans la vue messages
+    if (currentView === 'messages') {
+        renderContactsList();
+    }
 }
+function updateMessagesDisplay(contact) {
+    const messagesZone = document.getElementById('messagesZone');
+    if (!messagesZone) return;
+
+    // Générer le HTML des messages
+    const messagesHTML = (contact.messages || []).map(msg => `
+        <div class="flex ${msg.envoye ? 'justify-end' : 'justify-start'}">
+            <div class="${msg.envoye ? 'bg-green-500 text-white' : 'bg-white'} p-3 rounded-lg max-w-xs shadow">
+                <p>${msg.texte}</p>
+                <span class="text-xs ${msg.envoye ? 'text-green-100' : 'text-gray-500'} mt-1 block">${msg.heure}</span>
+            </div>
+        </div>
+    `).join('');
+
+    // Mettre à jour le contenu
+    messagesZone.innerHTML = messagesHTML;
+
+    // Scroll automatique vers le bas pour voir le nouveau message
+    messagesZone.scrollTop = messagesZone.scrollHeight;
+}
+
+
+// Modifier la fonction showChatInterface pour ajouter un bouton de gestion des membres
+
 
 // 3. Corriger la fonction selectContact pour éviter les problèmes avec onclick
 function selectContact(contact) {
@@ -772,7 +923,6 @@ function createArchivedGroupElement(group) {
     return div;
 }
 
-// 6. Assurer la cohérence des sélecteurs CSS
 // Vérifier que les classes CSS avec échappement fonctionnent
 function updateActiveButton(activeClass) {
     // Remplacer les sélecteurs problématiques
@@ -785,3 +935,287 @@ function updateActiveButton(activeClass) {
         activeBtn.classList.add('bg-[#e0b44b]');
     }
 }
+// Fonction pour afficher le modal de gestion des membres (Admin seulement)
+function showGroupMembersModal(group) {
+    if (group.admin !== "Vous") {
+        showNotification('Seul l\'administrateur peut gérer les membres du groupe', 'error');
+        return;
+    }
+
+    const modal = createModal('Gérer les membres du groupe', `
+        <div class="space-y-4">
+            <h3 class="font-medium text-gray-700">Membres actuels :</h3>
+            <div class="space-y-2 max-h-32 overflow-y-auto border rounded p-2" id="currentMembers">
+                ${group.membres.map(membre => `
+                    <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span>${membre}</span>
+                        <button class="text-red-500 hover:text-red-700 remove-member-btn" data-member="${membre}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <h3 class="font-medium text-gray-700">Ajouter des membres :</h3>
+            <div class="space-y-2 max-h-32 overflow-y-auto border rounded p-2">
+                ${contacts
+                    .filter(contact => !group.membres.includes(contact.nom))
+                    .map(contact => `
+                        <label class="flex items-center hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" value="${contact.nom}" class="mr-2 add-member-checkbox">
+                            <span>${contact.nom}</span>
+                        </label>
+                    `).join('')}
+            </div>
+        </div>
+    `, [
+        {
+            text: 'Annuler',
+            class: 'px-4 py-2 text-gray-600 hover:text-gray-800',
+            onClick: closeModal
+        },
+        {
+            text: 'Sauvegarder',
+            class: 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600',
+            onClick: () => updateGroupMembers(group)
+        }
+    ]);
+
+    showModal(modal, [
+        {
+            text: 'Annuler',
+            class: 'px-4 py-2 text-gray-600 hover:text-gray-800',
+            onClick: closeModal
+        },
+        {
+            text: 'Sauvegarder',
+            class: 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600',
+            onClick: () => updateGroupMembers(group)
+        }
+    ]);
+
+    // Ajouter les événements pour retirer des membres
+    setTimeout(() => {
+        document.querySelectorAll('.remove-member-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const memberName = this.getAttribute('data-member');
+                removeMemberFromGroup(group, memberName);
+            });
+        });
+    }, 100);
+}
+
+// Fonction pour retirer un membre du groupe
+function removeMemberFromGroup(group, memberName) {
+    if (group.membres.length <= 1) {
+        showNotification('Un groupe doit avoir au moins un membre', 'error');
+        return;
+    }
+
+    // Retirer le membre de la liste
+    group.membres = group.membres.filter(membre => membre !== memberName);
+    
+    // Mettre à jour l'affichage du modal
+    const currentMembersDiv = document.getElementById('currentMembers');
+    if (currentMembersDiv) {
+        currentMembersDiv.innerHTML = group.membres.map(membre => `
+            <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                <span>${membre}</span>
+                <button class="text-red-500 hover:text-red-700 remove-member-btn" data-member="${membre}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+
+        // Réattacher les événements
+        currentMembersDiv.querySelectorAll('.remove-member-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const memberName = this.getAttribute('data-member');
+                removeMemberFromGroup(group, memberName);
+            });
+        });
+    }
+
+    showNotification(`${memberName} a été retiré du groupe`, 'success');
+}
+
+function updateGroupMembers(group) {
+    // Récupérer les nouveaux membres sélectionnés
+    const selectedMembers = Array.from(document.querySelectorAll('.add-member-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+
+    // Ajouter les nouveaux membres
+    selectedMembers.forEach(member => {
+        if (!group.membres.includes(member)) {
+            group.membres.push(member);
+        }
+    });
+
+    // Mettre à jour l'affichage si on est dans la vue groupes
+    if (currentView === 'groups') {
+        renderGroupsList();
+    }
+
+    // Si le groupe est actuellement sélectionné, mettre à jour l'interface de chat
+    if (selectedContact && selectedContact.id === group.id) {
+        showChatInterface(group, true);
+    }
+
+    closeModal();
+    
+    if (selectedMembers.length > 0) {
+        showNotification(`${selectedMembers.length} membre(s) ajouté(s) au groupe`, 'success');
+    }
+}
+
+// Objet pour stocker les brouillons
+let drafts = {};
+
+// Fonction pour sauvegarder automatiquement les brouillons
+function saveDraft(contactId, message) {
+    if (message.trim()) {
+        drafts[contactId] = message;
+    } else {
+        delete drafts[contactId];
+    }
+}
+
+// Fonction pour charger un brouillon
+function loadDraft(contactId) {
+    return drafts[contactId] || '';
+}
+
+// Modifier la fonction showChatInterface pour inclure la gestion des brouillons
+function showChatInterface(contact, isGroup = false) {
+    const chatContainer = discussionsContainer;
+    chatContainer.innerHTML = `
+        <div class="flex flex-col h-full">
+            <!-- En-tête -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-300 bg-[#d5cebf]">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-${isGroup ? 'users' : 'user'} text-gray-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-medium">${contact.nom}</h2>
+                        ${isGroup ? `<p class="text-sm text-gray-600">${contact.membres.join(', ')}</p>
+                        <p class="text-xs text-blue-600 font-bold">${contact.admin === "Vous" ? "Vous : Admin du groupe" : ""}</p>` 
+                        : `<p class="text-sm text-gray-600">En ligne</p>`}
+                    </div>
+                </div>
+                <div class="flex gap-3 text-gray-600">
+                    ${isGroup && contact.admin === "Vous" ? `
+                        <button class="w-[30px] h-[30px] border-2 border-blue-500 rounded-full flex items-center justify-center" id="manageMembersBtn" title="Gérer les membres">
+                            <i class="fas fa-users-cog text-blue-500"></i>
+                        </button>
+                    ` : ''}
+                    <div class="w-[30px] h-[30px] border-2 border-orange-500 rounded-full text-center flex items-center justify-center">
+                            <i class="fa-solid fa-delete-left text-orange-500"></i>
+                        </div>
+                    <button class="w-8 h-8 border-2 border-gray-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-archive text-gray-500"></i>
+                    </button>
+                     <div class="w-[30px] h-[30px] border-2 border-black rounded-full text-center flex items-center justify-center">
+                            <i class="fa-solid fa-square text-black"></i>
+                        </div>
+                        <div class="w-[30px] h-[30px] border-2 border-red-500 rounded-full text-center flex items-center justify-center">
+                            <i class="fas fa-trash text-red-500"></i>
+                        </div>
+                </div>
+            </div>
+            <!-- Zone messages -->
+            <div id="messagesZone" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                ${
+                    (contact.messages || []).map(msg => `
+                        <div class="flex ${msg.envoye ? 'justify-end' : 'justify-start'}">
+                            <div class="${msg.envoye ? 'bg-green-500 text-white' : 'bg-white'} p-3 rounded-lg max-w-xs shadow">
+                                <p>${msg.texte}</p>
+                                <span class="text-xs ${msg.envoye ? 'text-green-100' : 'text-gray-500'} mt-1 block">${msg.heure}</span>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            </div>
+            <!-- Barre de saisie -->
+            <form id="messageForm" class="p-4 bg-gray-100 border-t border-gray-300">
+                <div class="flex items-center space-x-2">
+                    <button type="button" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                        <i class="fas fa-smile text-gray-600"></i>
+                    </button>
+                    <button type="button" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                        <i class="fas fa-paperclip text-gray-600"></i>
+                    </button>
+                    
+                    <div class="flex-1 relative">
+                        <input type="text" id="champMessage" placeholder="Tapez un message..." 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500" 
+                            autocomplete="off" required>
+                        <div id="draftIndicator" class="absolute -top-6 left-0 text-xs text-orange-500 hidden">
+                            <i class="fas fa-edit"></i> Brouillon sauvegardé
+                        </div>
+                    </div>
+                    <button type="submit"
+                        class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 text-white">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // Charger le brouillon existant
+    const messageInput = document.getElementById('champMessage');
+    const draftText = loadDraft(contact.id);
+    if (draftText) {
+        messageInput.value = draftText;
+        document.getElementById('draftIndicator').classList.remove('hidden');
+    }
+
+    // Sauvegarde automatique du brouillon
+    let draftTimeout;
+    messageInput.addEventListener('input', function() {
+        const indicator = document.getElementById('draftIndicator');
+        
+        // Effacer le timeout précédent
+        clearTimeout(draftTimeout);
+        
+        // Sauvegarder après 1 seconde d'inactivité
+        draftTimeout = setTimeout(() => {
+            const message = this.value.trim();
+            if (message) {
+                saveDraft(contact.id, message);
+                indicator.classList.remove('hidden');
+            } else {
+                indicator.classList.add('hidden');
+            }
+        }, 1000);
+    });
+
+    // Ajout du gestionnaire d'envoi de message
+    const form = document.getElementById('messageForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        envoyerMessage();
+        // Supprimer le brouillon après envoi
+        delete drafts[contact.id];
+        document.getElementById('draftIndicator').classList.add('hidden');
+    });
+
+    // Autres gestionnaires d'événements...
+    setTimeout(() => {
+        const manageMembersBtn = document.getElementById('manageMembersBtn');
+        if (manageMembersBtn && isGroup) {
+            manageMembersBtn.addEventListener('click', () => showGroupMembersModal(contact));
+        }
+
+        const archiveBtn = chatContainer.querySelector('.fa-archive')?.closest('button');
+        if (archiveBtn) {
+            archiveBtn.onclick = () => archiverDiscussion(contact, isGroup);
+        }
+        
+        // Scroll vers le bas
+        const messagesZone = document.getElementById('messagesZone');
+        messagesZone.scrollTop = messagesZone.scrollHeight;
+    }, 0);
+}
+
