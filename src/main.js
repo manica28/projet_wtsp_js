@@ -1,35 +1,179 @@
+import './style.css'
+const application = document.querySelector('#app')
+application.innerHTML= 
+   `
+    <!-- ::::::::::::::::::::::::::::::::::::::::::::::::: Page de Connexion :::::::::::::::::::::::::::::::::::::::::::::-->
+   
+    <div id="loginPage" class="w-full max-w-md">
+        <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 fade-in">
+            <!-- Logo et titre -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 chat-bubble">
+                    <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Echoo</h1>
+                <p class="text-gray-600">Bienvenue sur Echoo : ta voix, ton impact.</p>
+            </div>
+
+            <!-- ::::::::::::::::::::::::::::::::::::::::: Formulaire de connexion ::::::::::::::::::::::::::::::::::::::: -->
+           
+            <form id="loginForm" class="space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone</label>
+                        <div class="relative">
+                            <input 
+                                type="tel" 
+                                id="phone"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 pl-12"
+                                placeholder="+33 6 12 34 56 78">
+                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">ex:</span>
+                             <small class="mess"></small>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Code de vérification</label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="code"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 pl-12"
+                                placeholder="000000"
+                                maxlength="6">
+                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">ex:</span>
+                             <small class="mess"></small>
+                        </div>
+                    </div>
+                </div>
+
+                <button 
+                    type="submit"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg">
+                    Se connecter
+                </button>
+            </form>
+
+            <!-- :::::::::::::::::::::::::::::::::::::::::::::::::Options supplémentaires :::::::::::::::::::::::::::::::::::-->
+           
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Pas encore de compte ? 
+                    <a href="#" class="text-green-600 hover:text-green-700 font-semibold">S'inscrire</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::: Interface WhatsApp principale (cachée par défaut) :::::::::::::::::::::::::::::::::::::::::::: -->
+   
+    <div id="mainMenu" class="hidden w-full h-screen">
+        <div class="w-[1700px] h-[900px] shadow-2xl rounded bg-[#a59f94] flex mx-auto mt-4">
+            <!-- Barre latérale -->
+            <div class="w-[140px] h-full bg-[#dfded8] place-content-center flex flex-col gap-3 relative">
+                <div class="message w-[138px] h-[100px] border-2 border-[#e0b44b] rounded-2xl hover:bg-[#e0b44b] flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-message text-2xl"></i>
+                    <p>Messages</p>
+                </div>
+                <div class="groupe w-[138px] h-[100px] border-2 border-[#e0b44b] rounded-2xl hover:bg-[#e0b44b] flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-user-group text-2xl"></i>
+                    <p>Groupes</p>
+                </div>
+                <div class="diffusion w-[138px] h-[100px] border-2 border-[#e0b44b] rounded-2xl hover:bg-[#e0b44b] flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fas fa-broadcast-tower text-black text-2xl"></i>
+                    <p>Diffusions</p>
+                </div>
+                <div class="archive w-[138px] h-[100px] border-2 border-[#e0b44b] rounded-2xl hover:bg-[#e0b44b] flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fas fa-archive text-black text-2xl"></i>
+                    <p>Archives</p>
+                </div>
+                <div class="nouveau w-[138px] h-[100px] border-2 border-[#e0b44b] rounded-2xl hover:bg-[#e0b44b] flex flex-col items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-plus text-black text-2xl"></i>
+                    <p>Nouveau</p>
+                </div>
+                
+                <!-- :::::::::::::::::::Bouton déconnexion repositionné:::::::::::::::::::::::::::::::: -->
+              
+                <button onclick="logout()" class="relative top-[155px] left-2 w-[125px] h-[30px] border-2 bg-red-500 border-red-500 rounded-xl hover:bg-red-600 flex flex-col items-center justify-center cursor-pointer font-bold animate-bounce">
+                    Déconnexion
+                </button>
+
+                <!-- photo profil -->
+                <!-- <div class="fixed bottom-10 left-[150px] rounded-full w-[50px] h-[50px] border-2 border-[#e0b44b] flex justify-end items-end bg-image bg-cover"></div> -->
+            </div>
+
+            <!--:::::::::::::::::::::::::::::::::::::::::::::::::::::::::  Menu des discussions ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-->
+           
+            <div class="w-1/3 h-full bg-[#f9f5f7]" id="menu">
+                <div class="text-3xl font-bold border-b border-gray-200 pl-4 mt-4">Discussions</div>
+                <div class="p-3">
+                    <input type="text" placeholder="Rechercher ou commencez une nouvelle discussion" class="w-full pl-4 py-2 bg-white rounded-xl text-sm" id="searchInput">
+                </div>
+            </div>
+
+            <!-- :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  Zone de discussions ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+          
+            <div class="flex-1 h-full bg-[#d5cebf]" id="discus">
+                <div class="">
+                    <div class="flex justify-end gap-3 mt-[20px] mr-[10px] h-[60px] bg-[#d5cebf] border-b">
+                        <div class="w-[30px] h-[30px] border-2 border-orange-500 rounded-full text-center flex items-center justify-center">
+                            <i class="fa-solid fa-delete-left text-orange-500"></i>
+                        </div>
+                        <div class="w-[30px] h-[30px] border-2 border-gray-500 rounded-full text-center flex items-center justify-center">
+                            <i class="fas fa-archive text-gray-500"></i>
+                        </div>
+                        <div class="w-[30px] h-[30px] border-2 border-black rounded-full text-center flex items-center justify-center">
+                            <i class="fa-solid fa-square text-black"></i>
+                        </div>
+                        <div class="w-[30px] h-[30px] border-2 border-red-500 rounded-full text-center flex items-center justify-center">
+                            <i class="fas fa-trash text-red-500"></i>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-[170px]">
+                        <div class="w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl mb-2 text-center font-bold">WhatsApp Web</h2>
+                        <p class="text-sm text-center">Envoyez et recevez des messages sans garder votre téléphone connecté.</p>
+                        <p class="text-sm mt-2 text-center">Utilisez WhatsApp sur jusqu'à 4 appareils connectés et 1 téléphone en même temps.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   `
+
 import { contacts, groups, users } from './data.js';
-import { messageError, messageSucces, normalizePhone } from './validator.js'
 
 let currentView ='';
 let selectedContact = null;
 
 
-// Elements DOM
 const menuContainer = document.querySelector('.w-1\\/3'); // cible le mmenu de gauche
 const discussionsContainer = document.querySelector('.flex-1');
 const searchInput = document.getElementById('searchInput');
 
-// Initialisation
 document.addEventListener('DOMContentLoaded', function() 
 {
-    initializeEventListeners(); // ajoute les evenements
-    renderContactsList(); // affiche la liste initiale des contaxts
+    initializeEventListeners(); 
+    renderContactsList(); 
 });
 
-// Event Listeners
 function initializeEventListeners() {
-    // chargement des vues depuis le sidebar
     document.querySelector('.message').addEventListener('click', () => switchView('messages'));
     document.querySelector('.groupe').addEventListener('click', () => switchView('groups'));
     document.querySelector('.diffusion').addEventListener('click', () => switchView('broadcasts'));
     document.querySelector('.archive').addEventListener('click', () => switchView('archives'));
     document.querySelector('.nouveau').addEventListener('click', () => showNewContactModal());
 
-    // pour la recherche
     searchInput.addEventListener('input', handleSearch);
 
-    //  envoie de message
     const messageText = document.getElementById('messageText');
     const sendBtn = document.getElementById('sendBtn');
     const voiceBtn = document.getElementById('voiceBtn');
@@ -482,7 +626,6 @@ function renderArchivesList() {
             listContainer.appendChild(contactElement);
         });
         
-        // Afficher les groupes archivés
         groupesArchives.forEach(group => {
             const groupElement = createArchivedGroupElement(group);
             listContainer.appendChild(groupElement);
@@ -492,11 +635,9 @@ function renderArchivesList() {
     replaceListContent(listContainer);
 }
 
-// Modifier les fonctions de rendu pour exclure les éléments archivés
 function renderContactsList() {
     const listContainer = createListContainer();
     
-    // Filtrer les contacts non archivés
     const contactsNonArchives = contacts.filter(contact => !contact.archive);
     
     contactsNonArchives.forEach(contact => {
@@ -504,7 +645,6 @@ function renderContactsList() {
         listContainer.appendChild(contactElement);
     });
 
-    // Add "New Contact" button
     const newContactBtn = createNewContactButton();
     listContainer.appendChild(newContactBtn);
 
@@ -514,7 +654,6 @@ function renderContactsList() {
 function renderGroupsList() {
     const listContainer = createListContainer();
     
-    // Filtrer les groupes non archivés
     const groupesNonArchives = groups.filter(group => !group.archive);
     
     groupesNonArchives.forEach(group => {
@@ -522,7 +661,6 @@ function renderGroupsList() {
         listContainer.appendChild(groupElement);
     });
 
-    // Add "New Group" button
     const newGroupBtn = createNewGroupButton();
     listContainer.appendChild(newGroupBtn);
 
@@ -548,7 +686,6 @@ function showNotification(message, type = 'info')
         notification.remove();
     }, 3000);
 }
-// 1. Ajouter les fonctions manquantes
 
 function getInitiales(nom) {
     return nom.split(' ') // On découpe la chaîne nom en mots
@@ -588,14 +725,11 @@ function sendMessage() {
 
 function startVoiceMessage() {
     console.log('Démarrage de l\'enregistrement vocal...');
-    // Implémentation à ajouter selon vos besoins
 }
 
 function createBroadcastList() {
     console.log('Création d\'une liste de diffusion...');
-    // Implémentation à ajouter selon vos besoins
 }
-// Corriger la fonction renderDiffusion
 function renderDiffusion() {
     const listContainer = createListContainer();
     
@@ -660,24 +794,19 @@ function showNewBroadcastModal() {
         </div>
     `;
 
-    // Insérer le modal dans le DOM
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-    // Attacher les événements APRÈS que le modal soit dans le DOM
     setTimeout(() => {
-        // Bouton Annuler
         const cancelBtn = document.getElementById('cancelBtn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', closeModal);
         }
 
-        // Bouton Envoyer
         const sendBtn = document.getElementById('sendBtn');
         if (sendBtn) {
             sendBtn.addEventListener('click', sendBroadcastMessage);
         }
 
-        // Boutons sélectionner/désélectionner tout
         const selectAllBtn = document.getElementById('selectAllBtn');
         if (selectAllBtn) {
             selectAllBtn.addEventListener('click', () => {
@@ -741,42 +870,14 @@ function sendBroadcastMessage() {
         contact.dernierMessage = message;
         contact.heure = heure;
     });
-
-    console.log('Messages envoyés avec succès'); // Debug
     
     closeModal();
     showNotification(`Message envoyé à ${selectedRecipients.length} contact(s)`, 'success');
     
-    // Actualiser l'affichage si on est dans la vue messages
     if (currentView === 'messages') {
         renderContactsList();
     }
 }
-// 2. Corriger la fonction envoyerMessage pour la cohérence des propriétés
-// function envoyerMessage() {
-//     const input = document.getElementById('champMessage');
-//     const message = input.value.trim();
-//     if (!message) return;
-
-//     const now = new Date();
-//     const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-
-//     // Utiliser les mêmes noms de propriétés que dans l'affichage
-//     if (!selectedContact.messages) selectedContact.messages = [];
-//     selectedContact.messages.push({ 
-//         texte: message, // Changé de 'text' à 'texte'
-//         heure: heure,   // Cohérent
-//         envoye: true    // Changé de 'fromMe' à 'envoye'
-//     });
-
-//     // Mettre à jour le dernier message du contact
-//     selectedContact.dernierMessage = message;
-//     selectedContact.heure = heure;
-
-//     showChatInterface(selectedContact, !!selectedContact.membres); // Changé 'members' à 'membres'
-//     input.value = '';
-// }
-// Fonction corrigée pour envoyer un message et mettre à jour l'affichage
 function envoyerMessage() {
     const input = document.getElementById('champMessage');
     const message = input.value.trim();
@@ -785,21 +886,17 @@ function envoyerMessage() {
     const now = new Date();
     const heure = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    // Initialiser le tableau de messages si nécessaire
     if (!selectedContact.messages) selectedContact.messages = [];
     
-    // Ajouter le nouveau message
     selectedContact.messages.push({ 
         texte: message,
         heure: heure,
         envoye: true
     });
 
-    // Mettre à jour le dernier message du contact
     selectedContact.dernierMessage = message;
     selectedContact.heure = heure;
 
-    // Vider le champ de saisie
     input.value = '';
 
     // Supprimer le brouillon après envoi
@@ -809,10 +906,8 @@ function envoyerMessage() {
         draftIndicator.classList.add('hidden');
     }
 
-    // Mettre à jour uniquement la zone des messages au lieu de recharger toute l'interface
     updateMessagesDisplay(selectedContact);
 
-    // Mettre à jour la liste des contacts si on est dans la vue messages
     if (currentView === 'messages') {
         renderContactsList();
     }
@@ -821,7 +916,6 @@ function updateMessagesDisplay(contact) {
     const messagesZone = document.getElementById('messagesZone');
     if (!messagesZone) return;
 
-    // Générer le HTML des messages
     const messagesHTML = (contact.messages || []).map(msg => `
         <div class="flex ${msg.envoye ? 'justify-end' : 'justify-start'}">
             <div class="${msg.envoye ? 'bg-green-500 text-white' : 'bg-white'} p-3 rounded-lg max-w-xs shadow">
@@ -831,18 +925,11 @@ function updateMessagesDisplay(contact) {
         </div>
     `).join('');
 
-    // Mettre à jour le contenu
     messagesZone.innerHTML = messagesHTML;
 
-    // Scroll automatique vers le bas pour voir le nouveau message
     messagesZone.scrollTop = messagesZone.scrollHeight;
 }
 
-
-// Modifier la fonction showChatInterface pour ajouter un bouton de gestion des membres
-
-
-// 3. Corriger la fonction selectContact pour éviter les problèmes avec onclick
 function selectContact(contact) {
     selectedContact = contact;
     showChatInterface(contact);
@@ -925,7 +1012,6 @@ function createArchivedGroupElement(group) {
 
 // Vérifier que les classes CSS avec échappement fonctionnent
 function updateActiveButton(activeClass) {
-    // Remplacer les sélecteurs problématiques
     document.querySelectorAll('[class*="w-[138px]"]').forEach(btn => {
         btn.classList.remove('bg-[#e0b44b]');
     });
@@ -1015,7 +1101,6 @@ function removeMemberFromGroup(group, memberName) {
     // Retirer le membre de la liste
     group.membres = group.membres.filter(membre => membre !== memberName);
     
-    // Mettre à jour l'affichage du modal
     const currentMembersDiv = document.getElementById('currentMembers');
     if (currentMembersDiv) {
         currentMembersDiv.innerHTML = group.membres.map(membre => `
@@ -1027,7 +1112,6 @@ function removeMemberFromGroup(group, memberName) {
             </div>
         `).join('');
 
-        // Réattacher les événements
         currentMembersDiv.querySelectorAll('.remove-member-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const memberName = this.getAttribute('data-member');
@@ -1040,23 +1124,19 @@ function removeMemberFromGroup(group, memberName) {
 }
 
 function updateGroupMembers(group) {
-    // Récupérer les nouveaux membres sélectionnés
     const selectedMembers = Array.from(document.querySelectorAll('.add-member-checkbox:checked'))
         .map(checkbox => checkbox.value);
 
-    // Ajouter les nouveaux membres
     selectedMembers.forEach(member => {
         if (!group.membres.includes(member)) {
             group.membres.push(member);
         }
     });
 
-    // Mettre à jour l'affichage si on est dans la vue groupes
     if (currentView === 'groups') {
         renderGroupsList();
     }
 
-    // Si le groupe est actuellement sélectionné, mettre à jour l'interface de chat
     if (selectedContact && selectedContact.id === group.id) {
         showChatInterface(group, true);
     }
@@ -1163,7 +1243,6 @@ function showChatInterface(contact, isGroup = false) {
         </div>
     `;
 
-    // Charger le brouillon existant
     const messageInput = document.getElementById('champMessage');
     const draftText = loadDraft(contact.id);
     if (draftText) {
@@ -1171,7 +1250,6 @@ function showChatInterface(contact, isGroup = false) {
         document.getElementById('draftIndicator').classList.remove('hidden');
     }
 
-    // Sauvegarde automatique du brouillon
     let draftTimeout;
     messageInput.addEventListener('input', function() {
         const indicator = document.getElementById('draftIndicator');
@@ -1188,7 +1266,7 @@ function showChatInterface(contact, isGroup = false) {
             } else {
                 indicator.classList.add('hidden');
             }
-        }, 1000);
+        }, 2000);
     });
 
     // Ajout du gestionnaire d'envoi de message
