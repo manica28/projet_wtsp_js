@@ -69,7 +69,7 @@ let groups = [
 // data.js
 export const users= [
   { username: "admin", password: "1234", telephone: "770000000" },
-  { username: "user1", password: "azerty", telephone: "781234567" }
+  { username: "user1", password: "0000", telephone: "781234567" }
 ];
 
 

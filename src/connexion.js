@@ -82,30 +82,30 @@ window.addEventListener('load', function () {
 
 // === GESTION DU MENU ===
 
-// Gestion du menu latéral
-// document.addEventListener('DOMContentLoaded', function () {
-//     const menuItems = [
-//         { selector: '.message', name: 'Messages' },
-//         { selector: '.groupe', name: 'Groupes' },
-//         { selector: '.diffusion', name: 'Diffusions' },
-//         { selector: '.archive', name: 'Archives' },
-//         { selector: '.nouveau', name: 'Nouveau' }
-//     ];
+//Gestion du menu latéral
+document.addEventListener('DOMContentLoaded', function () {
+    const menuItems = [
+        { selector: '.message', name: 'Messages' },
+        { selector: '.groupe', name: 'Groupes' },
+        { selector: '.diffusion', name: 'Diffusions' },
+        { selector: '.archive', name: 'Archives' },
+        { selector: '.nouveau', name: 'Nouveau' }
+    ];
 
-//     menuItems.forEach(item => {
-//         document.addEventListener('click', function (e) {
-//             const element = e.target.closest(item.selector);
-//             if (element) {
-//                 document.querySelectorAll('.message, .groupe, .diffusion, .archive, .nouveau').forEach(el => {
-//                     el.classList.remove('bg-[#e0b44b]');
-//                 });
+    menuItems.forEach(item => {
+        document.addEventListener('click', function (e) {
+            const element = e.target.closest(item.selector);
+            if (element) {
+                document.querySelectorAll('.message, .groupe, .diffusion, .archive, .nouveau').forEach(el => {
+                    el.classList.remove('bg-[#e0b44b]');
+                });
 
-//                 element.classList.add('bg-[#e0b44b]');
-//                 console.log(`Navigué vers: ${item.name}`);
-//             }
-//         });
-//     });
-// });
+                element.classList.add('bg-[#e0b44b]');
+                console.log(`Navigué vers: ${item.name}`);
+            }
+        });
+    });
+});
 
 // === FORMATAGE DES CHAMPS ===
 
